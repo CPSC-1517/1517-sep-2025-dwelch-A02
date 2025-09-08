@@ -181,7 +181,50 @@ namespace OOPsReview
 
         //constructors
 
+        //your class does not technically need a coded constructor
+        //if you code a constructor for your class you are responsible for coding ALL constructors
+        //if you do not code a constructor then the system will assign the software datatype defaults
+        //  to your variables (data members/auto-implemented properties)
 
+        //if Employment did not have any coded constructor the following is the class initation
+        //  _Title = null
+        //  _Years = 0.0
+        //  StartDate = 01/01/0001
+        //  Level = SupervisoryLevel.Entry (int defaults to 0)
+
+        //syntax: accesslevel constructorname([list of parameters]) { .... }
+        //NOTE: NO return datatype
+        //      the constructorname MUST be the class name
+
+        //Default
+        //simulates the "system defaults"
+        public Employment()
+        {
+            //if there is no code within this constructor, the actions for setting
+            //  your internal fields will be using the system defaults for the datatype
+
+            //optionally
+            // you could assign values to your initial fields within this constructor typically
+            //      using literal values
+            //Why?
+            // your internal fields may have validation attached to the data for the field
+            // this validation is usually within the property
+            //
+            // you would wish to have valid data values for your internal fields
+            // you may wish to have a reason value that differs from the default datatype value
+            // you may wish to have some other value than the default
+
+            Title = "Unknown"; //Title cannot be null, empty or blank; cannot use the system default
+            StartDate = DateTime.Today; //a date of 01/01/0001 is not reasonable for this application
+            Level = SupervisoryLevel.TeamMember; //most of my people are team members
+
+            //Years??
+            //the default is fine (0.0)
+            //does one have to assign a value: NO
+            //COULD one assign a value: yes
+            //IF you WISH you could actually assign the value 0 yourself.
+            Years = 0.0;
+        }
 
         //methods
 
