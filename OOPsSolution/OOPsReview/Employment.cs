@@ -226,8 +226,112 @@ namespace OOPsReview
             Years = 0.0;
         }
 
+        //Greedy
+        //this is the constructor typically used to assign values to a instance at the time of
+        //    creation
+        //the list of parameters may or may not contain default parameter values
+        //if you have assigned default parameter values then those parameters MUST be at the end of
+        //  the parameter list
+        //in this example years is a default parameter (it has an assigned value if the value
+        //  is not included on the coded constructor in the user program
+        //using a call to a method with default parameter
+        //     Employment myJob = new Employment("PGI", SupervisoryLevel.Entry,
+        //                                          DateTime.Today);
+
+        public Employment (string title, SupervisoryLevel level,
+                            DateTime startdate, double years = 0.0)
+        {
+            //once again, good coding practice, all interact with
+            //  data within the class should be via the property
+            Title = title;
+
+            //Level is an auto-implement property so there is NO choice
+            //  but to use the property
+            Level = level;
+
+            //one could add validation, especially if the property has a private set
+            //  OR the property
+            //  is an auto-implemented property that has restrictions
+            //example
+            //validation, start date must not exist in the future
+            //validation can be done anywhere in your class
+            //since the property is auto-implemented AND/OR has a private set,
+            //      validation can be done  in the constructor OR a behaviour 
+            //      that alters the property
+            //IF the validation is done in the property, IT WOULD NOT be an
+            //      auto-implemented property BUT a fully-implemented property
+            // .Today has a time of 00:00:00 AM
+            // .Now has a specific time of day 13:05:45 PM
+            //by using the .Today.AddDays(1) you cover all times on a specific date
+
+            if (startdate >= DateTime.Today.AddDays(1))
+                throw new ArgumentException($"Start date of {startdate} is invalid. Dates cannot be in the future.","StartDate");
+            StartDate = startdate;
+
+            //you may need to add additional validation logic for a field
+            //  to ensure that the value is actually a correct meaningful value
+            //
+            //check that the year value is correct AND meaningful
+
+            if (years != 0.0)
+            {
+                //assume the user entered an appropriate meaningful value
+                Years = years;
+            }
+            else
+            {
+                //what if the value has defaulted
+                if (startdate == DateTime.Today)
+                {
+                    Years = years;
+                }
+                else
+                {
+                    //determined  the number of employeed years needs to
+                    // be calculate
+                    TimeSpan timediff = DateTime.Today - startdate;
+                    Years = Math.Round((timediff.Days / 365.2),1);
+                }
+            }
+        }
+
         //methods
 
+
+        //Every class in its base structure contains 3 basic methods
+        //  already available for use
+        //.ToString() is a method that will display the contents of an instance
+
+        //you may wish to customize the display string for your class
+        //to do so you can either create a unique method OR override the 
+        //  .ToString base method
+
+        public override string ToString()
+        {
+            //this string is known as a "comma separate value" string (csv)
+            //concern: when the date is used, it could have a , within the data value
+            //solution: IF this is a possibility that a value that is used in creating the string pattern
+            //              could make the pattern invalid, you should explicitly handle how the value should be
+            //              displayed in the string
+            //example Date:  Jan 05, 2025 (due to using StartDate.ToShortDate())
+            //solution:  specific your own format  StartDate.ToString("MMM dd yyyy")
+
+            //Another solution is to change your delimitator that separates your values to a character
+            //  that is not within your range of possible values
+            //example use a '/'
+            //when you use the .Split(delimitator) method to breakup the string into separate values
+            //  you would use the delimitator '/':  string [] pieces = thestring.Split('/')
+
+            //used at Nait for VS software which appears to NOT included the . after the
+            //  MMM of date ToString
+            //return $"{Title},{Level},{StartDate.ToString("MMM. dd yyyy")},{Years}";
+
+            //used at home for VS software which appears to included the . after the
+            //  MMM of date ToString
+            return $"{Title},{Level},{StartDate.ToString("MMM dd yyyy")},{Years}";
+        }
+
+        // !!!! WHAT IF scenarios EXAMPLES
 
     }
 }
