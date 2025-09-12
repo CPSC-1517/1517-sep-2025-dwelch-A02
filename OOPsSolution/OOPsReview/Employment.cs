@@ -264,9 +264,10 @@ namespace OOPsReview
             // .Now has a specific time of day 13:05:45 PM
             //by using the .Today.AddDays(1) you cover all times on a specific date
 
-            if (startdate >= DateTime.Today.AddDays(1))
-                throw new ArgumentException($"Start date of {startdate} is invalid. Dates cannot be in the future.","StartDate");
-            StartDate = startdate;
+            //if (startdate >= DateTime.Today.AddDays(1))
+            //    throw new ArgumentException($"Start date of {startdate} is invalid. Dates cannot be in the future.","StartDate");
+            if(CheckDate(startdate))
+                StartDate = startdate;
 
             //you may need to add additional validation logic for a field
             //  to ensure that the value is actually a correct meaningful value
@@ -333,5 +334,45 @@ namespace OOPsReview
 
         // !!!! WHAT IF scenarios EXAMPLES
 
+        //Sample action:Assume the SupervisoryLevel is a private set
+        //this means altering the Level must be done in constructor (which executes
+        //ONLY ONCE during creation) or
+        //  via a method
+        public void SetEmploymentResponsibilityLevel(SupervisoryLevel level)
+        {
+            Level = level;
+        }
+
+        //What if the StartDate was a private set
+        //you need to correct the startdate after the instance was created
+
+        public void CorrectStartDate(DateTime startdate)
+        {
+            //one MAY have to duplicate logic in multiple places
+            //if (startdate >= DateTime.Today.AddDays(1))
+            //{
+            //    throw new ArgumentException($"The start date of {startdate} is invalid, date cannot be in the future");
+            //}
+
+            //instead of having duplicate code, we can use fundamental coding practices
+            //one could create a method solely used by the class to logic
+            //this method would be a private method
+            if (CheckDate(startdate))
+                StartDate = startdate;
+
+            //since the StartDate has beeb alter, the Years needs to be recalculated
+            TimeSpan timediff = DateTime.Today - startdate;
+            Years = Math.Round((timediff.Days / 365.2), 1);
+        }
+
+        //this is a private method use solely within the class for class  purposes
+        private bool CheckDate(DateTime startdate)
+        {
+            if (startdate >= DateTime.Today.AddDays(1))
+            {
+                throw new ArgumentException($"The start date of {startdate} is invalid, date cannot be in the future");
+            }
+            return true;
+        }
     }
 }

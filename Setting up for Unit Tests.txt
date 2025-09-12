@@ -1,0 +1,40 @@
+Installing Unit Testing Project
+
+1) download the supplied zip file
+2) unpack the supplied zip file
+3) copy the Unit Testing Project folder into your solution folder
+
+Add project to solution
+1) Open your solution in Visual Studio
+2) Open your solution explorer
+3) right click on solution name in your Solution Explorer; select Add; select Existing Project
+4) Navigation to the Unit Testing folder; enter folder; select csproj file
+
+Checks of code
+1) Does your class library compile (need a clean build)
+2) Open and comment out your unit tests inside the unit test class
+3) CHECK the target build for your unit tests
+      right click on your unit tests project name
+      select properties at the bottom of the menu
+      check the target framework under Application
+      endure the target is the same as your class library (.Net 9.0)
+4) rebuild your unit test project
+
+Link the Unit Testing project to the class library
+1) check Dependencies for and warning sign
+2) if there is a warning sign expand Dependencies; warning will probably be under Project
+   Right click the entry under project and Remove
+3) Right click on Dependencies and select Add Project Reference
+4) Select the class library listed in your Projects then click Ok
+5) Open your unit testing class(es) and check for a using clause that may be incorrect
+   that is pointing to a namespace to which you do not have access
+6) if you are missing the namespace of your class library, add to your classes within
+   the unit testing project
+7) rebuild your unit test project
+
+Use a unit test
+1) uncomment one unit test at a time
+2) rebuild your unit test project
+3) assuming a clear compile, you should be able to run your unit tests
+4) to run all unit tests in your project, select your unit test project name, select Run Tests
+5) Open your Test Explorer (under menu View) and review the results of the test run
