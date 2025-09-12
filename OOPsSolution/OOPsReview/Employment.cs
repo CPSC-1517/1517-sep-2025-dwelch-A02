@@ -114,7 +114,8 @@ namespace OOPsReview
             set
             {
                 // if (value < 0)
-                if (double.IsNegative(value))
+                //if (double.IsNegative(value))
+                if(!Utilities.IsZeroOrPositive(value))
                 {
                     throw new ArgumentException($"Year value {value} must be 0 or greater.", "Years");
                 }
