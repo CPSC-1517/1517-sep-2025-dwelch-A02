@@ -198,6 +198,75 @@ namespace TDDUnitTesting
 
         #region Properties
         #region for valid data
+        //successfully change the FirstName on a instance of Person
+        //  via the Property
+        [Fact]
+        public void Successfully_Change_FirstName_Via_Property()
+        {
+            //Arrange
+            string expectedFirstName = "Don";
+            //Person sut = new Person(); //default firstname is Unknown
+            Person sut = new Person("Lowand", "Behold", null, null);
+
+            //Act
+            sut.FirstName = "  Don   ";
+
+            //Assert
+            sut.FirstName.Should().Be(expectedFirstName);
+
+        }
+        //successfully change the LastName on a instance of Person
+        //  via the Property
+        [Fact]
+        public void Successfully_Change_LastName_Via_Property()
+        {
+            //Arrange
+            string expectedLastName = "Welch";
+            //Person sut = new Person(); //default firstname is Unknown
+            Person sut = new Person("Lowand", "Behold", null, null);
+
+            //Act
+            sut.LastName = "  Welch   ";
+
+            //Assert
+            sut.LastName.Should().Be(expectedLastName);
+
+        }
+        //successfully change the Address on a instance of Person
+        //  via the Property
+        [Fact]
+        public void Successfully_Change_Address_Via_Property()
+        {
+            //Arrange
+            ResidentAddress expectedAddress = new ResidentAddress(321, "Oaklane Ave",
+                                    "St, Albert", "AB", "T4E3W2");
+            Person sut = new Person("Lowand", "Behold", 
+                        new ResidentAddress(123, "Maple St.", "Edmonton", "AB", "T6Y7U8"),null);
+
+            //Act
+            sut.Address = new ResidentAddress(321, "Oaklane Ave",
+                                    "St, Albert", "AB", "T4E3W2");
+
+            //Assert
+            sut.Address.Should().Be(expectedAddress);
+        }
+        //successfully return the person's fullname from an instance
+        //          via a property; format last, first
+        [Fact]
+        public void Successfully_Return_FullName_Via_Property()
+        {
+            //Arrange
+            string expectedFullName = "Ujest, Shirley";
+            Person sut = new Person("Shirley", "Ujest", null, null);
+
+
+            //Act
+            string fullname = sut.FullName;
+
+            //Assert
+            fullname.Should().Be(expectedFullName);
+
+        }
         #endregion
         #region for exception testing
         #endregion
@@ -209,5 +278,6 @@ namespace TDDUnitTesting
         #region for exception testing
         #endregion
         #endregion
+        
     }
 }
