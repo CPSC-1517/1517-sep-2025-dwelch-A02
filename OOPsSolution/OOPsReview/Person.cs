@@ -14,19 +14,31 @@ namespace OOPsReview
         public string FirstName 
         { 
             get { return _FirstName; } 
-            set { _FirstName = value.Trim(); }
+            set 
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentNullException("FirstName", "First name cannot be missing or blank.");
+                _FirstName = value.Trim(); 
+            }
         }
         public string LastName
         {
             get { return _LastName; }
-            set { _LastName = value.Trim(); }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentNullException("LastName", "Last name cannot be missing or blank.");
+                _LastName = value.Trim();
+            }
         }
         public ResidentAddress Address { get; set; }
 
         //when an instance is being created, the o/s will first
         //  generate your storage areas, assign default datatype values,
         //  assign declaration assignment values THEN execute the appropriate constructor
-        public List<Employment> EmploymentPositions { get; set; } = new List<Employment>();
+
+        // a private set means that no outside user can alter this property directly.
+        public List<Employment> EmploymentPositions { get; private set; } = new List<Employment>();
         
         public string FullName
         {
@@ -44,8 +56,12 @@ namespace OOPsReview
         public Person(string firstname, string lastname,
                     ResidentAddress address, List<Employment> employments)
         {
-            if (string.IsNullOrWhiteSpace(firstname))
-                throw new ArgumentNullException("FirstName","First name cannot be missing or blank");
+
+            //once the validation is placed into the property,  Refactoring, discovers that the
+            //  code in the constructor is not required. The code can be removed
+            //if (string.IsNullOrWhiteSpace(firstname))
+            //    throw new ArgumentNullException("FirstName","First name cannot be missing or blank");
+
             if (string.IsNullOrWhiteSpace(lastname))
                 throw new ArgumentNullException("LastName", "Last name cannot be missing or blank");
             FirstName = firstname; //.Trim() can be refactored due to the Trim in the property
@@ -58,6 +74,12 @@ namespace OOPsReview
             //else
             //    //parameter has not list instance
             //    EmploymentPositions = new List<Employment>();
+        }
+
+        public void ChangeFullName(string firstname, string lastname)
+        {
+            FirstName = firstname;
+            LastName = lastname;
         }
     }
 }

@@ -250,6 +250,23 @@ namespace TDDUnitTesting
             //Assert
             sut.Address.Should().Be(expectedAddress);
         }
+
+        //your current home burns down, you get evicted, etc.
+        [Fact]
+        public void Successfully_Change_Address_To_Null_Via_Property()
+        {
+            //Arrange
+            
+            Person sut = new Person("Lowand", "Behold",
+                        new ResidentAddress(123, "Maple St.", "Edmonton", "AB", "T6Y7U8"), null);
+
+            //Act
+            sut.Address = null;
+
+            //Assert
+            sut.Address.Should().BeNull();
+        }
+
         //successfully return the person's fullname from an instance
         //          via a property; format last, first
         [Fact]
@@ -269,15 +286,81 @@ namespace TDDUnitTesting
         }
         #endregion
         #region for exception testing
+        //throw ArgumentNullException if first name is missing while change via the property
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("      ")]
+        public void Throw_Exception_Directly_Changing_FirstName_Via_Property_With_Missing_Data(string firstname)
+        {
+            //Where - Arrange setup
+            Person sut = new Person("Don", "Welch", null, null);
+
+            //When - Act execution
+            Action action = () => sut.FirstName = firstname;
+
+            //Then - Assert check
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        //throw ArgumentNullException if last name is missing while change via the property
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("      ")]
+        public void Throw_Exception_Directly_Changing_LastName_Via_Property_With_Missing_Data(string lastname)
+        {
+            //Where - Arrange setup
+            Person sut = new Person("Don", "Welch", null, null);
+
+            //When - Act execution
+            Action action = () => sut.LastName = lastname;
+
+            //Then - Assert check
+            action.Should().Throw<ArgumentNullException>();
+        }
+
         #endregion
         #endregion
 
         #region Methods
         #region for valid data
+        //person's fullname (first and last) should be able to be changed in one method
+        [Fact]
+        public void Succesfully_Change_FullName_At_One_Time()
+        {
+            //Arrange
+            string expectedFullName = "Behold, Lowand";
+            Person sut = new Person("Shirley", "Ujest", null, null);
+
+            //Act
+            sut.ChangeFullName("Lowand", "Behold");
+
+            //Assert
+            sut.FullName.Should().Be(expectedFullName);
+        }
         #endregion
         #region for exception testing
+        [Theory]
+        [InlineData(null,"Welch")]
+        [InlineData("", "Welch")]
+        [InlineData("      ", "Welch")]
+        [InlineData("Don",null)]
+        [InlineData("Don","")]
+        [InlineData("Don", "    ")]
+        public void Throw_Exception_Changing_FulltName_Via_Method_With_Missing_Data(string firstname, string lastname)
+        {
+            //Where - Arrange setup
+            Person sut = new Person("Don", "Welch", null, null);
+
+            //When - Act execution
+            Action action = () => sut.ChangeFullName(firstname, lastname);
+
+            //Then - Assert check
+            action.Should().Throw<ArgumentNullException>();
+        }
         #endregion
         #endregion
-        
+
     }
 }
