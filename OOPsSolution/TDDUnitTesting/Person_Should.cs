@@ -339,6 +339,72 @@ namespace TDDUnitTesting
             //Assert
             sut.FullName.Should().Be(expectedFullName);
         }
+
+        //successfully add the first instance of employment to the person
+        [Fact]
+        public void Successfully_Add_First_Employment()
+        {
+            //Arrange
+            //data needed
+            Person sut = new Person("Shirley", "Ujest", null, null);
+
+            //data needed for act
+            Employment newemployment = new Employment("PG II", SupervisoryLevel.TeamLeader,
+                                DateTime.Parse("2020/10/10"));
+            int expectedEmploymentPositionsCount = 1;
+            List<Employment> expectedEmployments = new List<Employment>();
+            expectedEmployments.Add(newemployment);
+
+            //Act
+            sut.AddEmployment(newemployment);
+
+            //Assert
+            //best practise to check the count of your list before checking the contents
+            sut.EmploymentPositions.Count().Should().Be(expectedEmploymentPositionsCount);
+            //what about the collection itself
+            // - it has to have the correct instances
+            // - the instances should be in the same physical order
+            sut.EmploymentPositions.Should().ContainInConsecutiveOrder(expectedEmployments);
+        }
+
+        //successfully add another instance of employment to the person
+        [Fact]
+        public void Successfully_Add_The_Next_Employment()
+        {
+            //Arrange
+            //data needed
+            Employment one = new Employment("PG I", SupervisoryLevel.TeamMember,
+                               DateTime.Parse("2013/10/10"),6.5);
+            Employment two = new Employment("PG II", SupervisoryLevel.TeamLeader,
+                               DateTime.Parse("2020/10/10"));
+            List<Employment> existingEmployments = new List<Employment>();
+            existingEmployments.Add(one);
+            existingEmployments.Add(two);
+            Person sut = new Person("Shirley", "Ujest", null, existingEmployments);
+
+            //data needed for act
+            Employment newemployment = new Employment("Sup I", SupervisoryLevel.Supervisor,
+                                DateTime.Today);
+            
+            List<Employment> expectedEmployments = new List<Employment>();
+            //when creating your expected collection you need to add
+            //      any existing records of your original collection
+            expectedEmployments.Add(one);
+            expectedEmployments.Add(two);
+            expectedEmployments.Add(newemployment);
+
+            //Act
+            sut.AddEmployment(newemployment);
+
+            //Assert
+            //best practise to check the count of your list before checking the contents
+            sut.EmploymentPositions.Count().Should().Be(expectedEmployments.Count);
+            //what about the collection itself
+            // - it has to have the correct instances
+            // - the instances should be in the same physical order
+         
+            sut.EmploymentPositions.Should().ContainInConsecutiveOrder(expectedEmployments);
+        }
         #endregion
         #region for exception testing
         [Theory]
@@ -358,6 +424,52 @@ namespace TDDUnitTesting
 
             //Then - Assert check
             action.Should().Throw<ArgumentNullException>();
+        }
+
+        //when no employment data sent to method
+        [Fact]
+        public void Throw_Exception_When_Missing_Employment_Data_During_AddEmployment()
+        {
+            //Arrange
+            //data needed
+            Person sut = new Person("Shirley", "Ujest", null, null);
+
+          
+            //Act
+            Action action = () => sut.AddEmployment(null);
+
+            //Assert
+            //one can test the contents of the error message being thrown
+            //this is done using the .WithMessage(string)
+            //a substring of the error message can be check using *.....* for the string
+            //one can use string interpolation with the creation of the string
+            action.Should().Throw<ArgumentNullException>().WithMessage("*Missing data*");
+        }
+
+        //any duplicate employment records should not be accepted
+        [Fact]
+        public void Throw_Exception_When_Adding_Duplicate_Employment_Instance()
+        {
+            //Arrange
+            //data needed
+            Employment one = new Employment("PG I", SupervisoryLevel.TeamMember,
+                               DateTime.Parse("2013/10/10"), 6.5);
+            Employment two = new Employment("PG II", SupervisoryLevel.TeamLeader,
+                               DateTime.Parse("2020/10/10"));
+            Employment newemployment = new Employment("Sup I", SupervisoryLevel.Supervisor,
+                              DateTime.Today);
+            List<Employment> existingEmployments = new List<Employment>();
+            existingEmployments.Add(one);
+            existingEmployments.Add(two);
+            Person sut = new Person("Shirley", "Ujest", null, existingEmployments);
+
+
+
+            //Act
+            Action action = () => sut.AddEmployment(two);
+
+            //Assert
+            action.Should().Throw<ArgumentException>().WithMessage($"*{two.Title} on {two.StartDate}*");
         }
         #endregion
         #endregion

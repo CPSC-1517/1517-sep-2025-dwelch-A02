@@ -81,5 +81,35 @@ namespace OOPsReview
             FirstName = firstname;
             LastName = lastname;
         }
+
+        public void AddEmployment(Employment employment)
+        {
+            if (employment == null)
+                throw new ArgumentNullException("Employment","No employment supplied, missing data");
+            
+            //one could code a loop to examine each item in the collection to determine if there
+            //  is a duplicate history instance
+            //However, lets used methods that have already been built to do searching of a collection
+            //First step: determine if you need a copy of the instance
+            //  in this case: only the knowledge that an instance exist is needed
+            //  (do not actual need the instance)
+            //  condition: only at least one needs to exist: .Any()
+
+            //within the method one can place one or more delegates (conditions) that
+            //  determine if the action is true or false
+            //delegate syntax structure:
+            //      collectionplaceholderlabel => collectionplaceholderlabel[.property] [condition] value 
+            //                  [ && or || another condition ...]
+            //typically the collectionplaceholderlabel is very short such x
+            //the collectionplaceholderlabel represents any instance in your collection at any time
+            
+            if(EmploymentPositions.Any(x => x.Title == employment.Title
+                                        && x.StartDate.Equals(employment.StartDate)))
+            {
+                throw new ArgumentException($"Duplicate employment: {employment.Title} on {employment.StartDate}","Employment");
+            }
+            
+            EmploymentPositions.Add(employment);
+        }
     }
 }
