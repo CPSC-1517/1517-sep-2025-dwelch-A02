@@ -1,6 +1,10 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">BlazorApp</a>
+        <a class="navbar-brand" href="">
+            <img src="./img/WestWindLogo.png" alt="logo"
+                    style="width:40px; height:40px;"
+                    title="Go to home" />
+            Blazor App</a>
     </div>
 </div>
 
@@ -23,6 +27,22 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="weather">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="basicevents">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Basic Events
+            </NavLink>
+        </div>
+
+        <!-- 
+            the href is the routing name for your page
+            the text at the end of the span tag is the text on the menu
+        -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="privacy">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Privacy
             </NavLink>
         </div>
     </nav>
