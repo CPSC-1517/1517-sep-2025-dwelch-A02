@@ -19,7 +19,7 @@
 <h1>Basic Button Events</h1>
 <h4 style="color:blue; font-style:italic;">Leaning about buttons and events</h4>
 
-<blockquote style="background-color:aquamarine">
+<blockquote style="background-color:aquamarine; margin-left:50px; margin-right:50px;">
     This page will demonstrate the basics of button events. It will
     use a &lt;input&gt; control to ask for some user input. It will
     use a &lt;button&gt; control to process the input. It will
@@ -51,9 +51,27 @@
 
 <button type="submit" @onclick="OnClear">Clear</button>
 
+<!--
+    setup some controls to play the game Heads or Tails
+    you will note that the form control is not necessary
+    Like Razor pages, the controls will be html basic controls
+    Like ASP pages, data will automatically be transferred between
+        your C# variables and the html controls
+-->
+<br/><br/>
+<label for="inputcontrol">Enter a H for Heads or T for Tails:</label>&nbsp;&nbsp;
+
+<!--
+        the bind is indicating the C# variable to be associated with this control
+        data will automatically be transferred between the two items
+    -->
+<input type="text" id="inputcontrol" placeholder="eg: H" @bind="inputValue" />&nbsp;&nbsp;
+<button type="submit" @onclick="OnFlip" class="btn btn-outline-primary rounded-pill" style="width:300px;" >Coin Flip</button>
+
+
 @code {
-    /*
-    * the comment in this block, as everything in this coding block, is C#
+        /*
+        * the comment in this block, as everything in this coding block, is C#
     * the directive @code indicates the coding block
     */
 
@@ -63,6 +81,7 @@
      */
 
     private string WelcomeMsg = "";
+    private string inputValue = "";
 
     //there are special events already created for the blazor component
     // one is the ability to execute code as the page is 1st created
@@ -85,5 +104,57 @@
     protected void OnClear()
     {
         WelcomeMsg = "Remaining on the page";
+    }
+
+    protected void OnFlip()
+    {
+        //this event will play the game heads (0) or tails (1)
+        //the event will generate a random heads or tails value
+        //  to compare to the entered value
+        //display the results in the WelcomeMsg string.
+
+        //empty old messages
+        WelcomeMsg = "";
+
+        //setup the random flip
+        Random rnd = new Random();
+        int flip = rnd.Next(0, 2); //generate a value of 0 ro 1; the upper limit is excluded
+
+        //validate incoming data
+        if (inputValue.ToUpper().Trim().Equals("H") || 
+            inputValue.ToUpper().Trim().Equals("T"))
+        {
+            //valid data
+            if (flip == 0)
+            {
+                //heads
+                if (inputValue.ToUpper().Trim().Equals("H"))
+                {
+                    WelcomeMsg = "You guessed the computer flip. You win."; 
+                }
+                else
+                {
+                    WelcomeMsg = "You did not guessed the computer flip. You lose.";
+                }
+            }
+            else
+            {
+                //tails
+                if (inputValue.ToUpper().Trim().Equals("T"))
+                //{
+                    WelcomeMsg = "You guessed the computer flip. You win.";
+
+               // }
+                else
+               // {
+                    WelcomeMsg = "You did not guessed the computer flip. You lose.";
+               // }
+            }
+        }
+        else
+        {
+            //invalid data
+            WelcomeMsg = "You did not enter a H or T";
+        }
     }
 }
