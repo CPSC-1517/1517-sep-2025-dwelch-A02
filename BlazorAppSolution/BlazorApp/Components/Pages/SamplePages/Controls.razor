@@ -1,0 +1,55 @@
+﻿@page "/controls"
+@rendermode InteractiveServer
+<PageTitle>Various Controls</PageTitle>
+<h3>Various Controls</h3>
+<h4>using multiple components</h4>
+
+<!-- add a custom css file to this page ONLY-->
+<HeadContent>
+    <link href="~/mycss.css" rel="stylesheet" />
+</HeadContent>
+
+
+@* <section class="row">
+    @if(!string.IsNullOrWhiteSpace(receivedData))
+    {
+        <p>This is the data sent from the child component: &gt;@receivedData&lt;</p>
+    }
+</section> *@
+
+<!-- this will be a 3 column one row combined component-->
+<section class="row">
+    <div class="col-md-4">
+        <h5>Textboxes</h5>
+        <!-- OnDataSent is the call back event EventCallBack<T> specified
+                in the child component-->
+        @*         <ControlsTextBoxes OnDataSent="HandleDataSent"></ControlsTextBoxes>*@
+        <ControlsTextBoxes></ControlsTextBoxes> 
+
+        <!--
+            this is using a child component that has NO call back event
+            <ControlsTextBoxes></ControlsTextBoxes>
+        -->
+    </div>
+    <div class="col-md-4">
+        <h5>RadioButtons/CheckBox/TextArea</h5>
+        @* <ControlsRadioCheckboxTextArea OnDataSent="HandleDataSent"></ControlsRadioCheckboxTextArea> *@
+        <ControlsRadioCheckboxTextArea></ControlsRadioCheckboxTextArea>
+
+    </div>
+    <div class="col-md-4">
+        <h5>Lists/Slider</h5>
+        @* <ControlsListAndSlider OnDataSent="HandleDataSent"></ControlsListAndSlider> *@
+        <ControlsListAndSlider></ControlsListAndSlider>
+
+    </div>
+</section>
+
+@code {
+    private string receivedData;
+
+    // private void HandleDataSent(string data)
+    // {
+    //     receivedData = data;
+    // }
+}

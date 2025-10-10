@@ -1,0 +1,46 @@
+﻿<h3>ControlsTextBoxes</h3>
+<label>
+    Email input
+    <input type="email" @bind="emailText"
+           placeholder="enter email" />
+</label>
+<br />
+<label>
+    Password input
+    <input type="password" @bind="passwordText"
+           placeholder="enter password" />
+</label>
+<br />
+<label>
+    Date input
+    <input type="date" @bind="datetimeText"
+           placeholder="enter a date" />
+</label>
+<br />
+<button type="submit" value="textbox" id="theTextButton"
+        name="theTextButton" @onclick="TextProcessing">
+    Text Submit
+</button>
+<br/>
+<br/>
+<p>@feedback</p>
+@code {
+    private string emailText;
+    private string passwordText;
+    private DateTime datetimeText;
+    private string feedback;
+
+    // [Parameter] public string DataToSend { get; set; }
+    // //this is a bound event handler delegate
+    // [Parameter] public EventCallback<string> OnDataSent { get; set; }
+
+
+    private void TextProcessing()
+    {
+        
+       feedback = $"Email {emailText} -- Password {passwordText} --  DateTime {datetimeText.ToShortDateString()}";
+      
+    }
+
+
+}

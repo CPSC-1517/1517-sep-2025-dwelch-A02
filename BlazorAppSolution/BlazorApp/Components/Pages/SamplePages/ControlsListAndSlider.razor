@@ -1,0 +1,93 @@
+﻿<!-- required for SelectionList class-->
+@using BlazorApp.Data
+<h3>Controls Lists and Sliders</h3>
+<label>
+    Select favourite Ride<br/>
+    <select @bind="myRide">
+        <!-- by default the first physical line in your select is the
+                active selected value
+        -->
+        <option value="0">select a ride ...</option>
+        @foreach(var item in Rides)
+        {
+            <option value="@item.ValueId">@item.DisplayText</option>
+        }
+    </select>
+</label>
+<br/>
+<label>
+    Select favourite Vacation Spot
+    <input type="text" @bind="vacationSpot"
+        list = "VacationChoices" />
+    <!-- notice the linkage between input and datalist via list and id respectively-->
+    <datalist id="VacationChoices">
+        @foreach(var item in VacationSpotList)
+        {
+            //use if expected value is the same as the display value
+            <option value="@item"/>
+
+        @*   use if the expected value is different then the display value
+                this setup is the same as the drop down list
+
+            <option value="@item.expectedvalue">@item.displayvalue</option>*@ 
+        }
+    </datalist>
+</label>
+<br/>
+<label>
+    Review of controls (bad &lt; - &gt; good)
+    <input type="range" min="0" max="10" steps="1" 
+        @bind="rangeValue" checked="@rangeValue" />
+</label>
+<br />
+<button type="submit" value="list" id="ListSliderButton"
+        name="ListSliderButton" @onclick="ListSliderProcessing">
+    Text Submit
+</button>
+<br/>
+<br/>
+<p>@feedback</p>
+@code {
+
+    private string vacationSpot;
+    private int myRide;
+    private int rangeValue = 5;
+    private string feedback;
+    public List<SelectionList> Rides { get; set; } = new();
+    public List<string> VacationSpotList { get; set; } = new();
+
+    // [Parameter] public string DataToSend{ get; set; }
+    // //this is a bound event handler delegate
+    // [Parameter] public EventCallback<string> OnDataSent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        //pretending that this data comes from the database
+        Rides = new List<SelectionList>();
+        Rides.Add(new SelectionList() { ValueId = 3, DisplayText="Bike" });
+        Rides.Add(new SelectionList() { ValueId = 5, DisplayText="Board" });
+        Rides.Add(new SelectionList() { ValueId = 2, DisplayText="Bus" });
+        Rides.Add(new SelectionList() { ValueId = 1, DisplayText="Car" });
+        Rides.Add(new SelectionList() { ValueId = 4, DisplayText="Motorcycle" });
+
+        VacationSpotList = new List<string>();
+        VacationSpotList.Add("California");
+        VacationSpotList.Add("Caribbean");
+        VacationSpotList.Add("Cruising");
+        VacationSpotList.Add("Europe");
+        VacationSpotList.Add("Florida");
+        VacationSpotList.Add("Mexico");
+
+    }
+
+    private void ListSliderProcessing()
+    {
+        //feedback is filled then feedback fills DataToSend
+        feedback = $"Ride {myRide} -- Vacation {vacationSpot} --  Range {rangeValue}";
+        //evokes the EventCallback
+        // DataToSend = feedback;
+        // OnDataSent.InvokeAsync(DataToSend);
+    }
+
+
+}

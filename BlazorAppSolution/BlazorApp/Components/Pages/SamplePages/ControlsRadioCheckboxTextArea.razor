@@ -1,0 +1,81 @@
+﻿<h3>Controls Radio CheckBox TextArea</h3>
+<label>
+    Select favourite meal<br />
+</label>
+<!-- hard coded version
+    You need to include the Microsoft.AspNetCore.Components.Forms namespace 
+       for the form and input controls to work. 
+    This namespace provides essential classes and components for handling 
+       forms in Blazor
+    When you create a new Blazor project using the Blazor project template, 
+       the Microsoft.AspNetCore.Components.Forms namespace is typically 
+       included in the _Imports.razor file.
+
+    This is not basic html controls but is MUCH cleaner and easier to use than
+       what would be require if the <input type=radio> control was used
+-->
+@*
+    <InputRadioGroup Name="shortMealRadio" @bind-Value="@selectedMeal"><br />
+       <InputRadio Name="shortMealRadio" Value=@("Breakfast") /> @(" Breakfast")<br>
+       <InputRadio Name="shortMealRadio" Value=@("Lunch") /> @(" Lunch")<br>
+       <InputRadio Name="shortMealRadio" Value=@("Supper") /> @(" Supper")<br>
+       <InputRadio Name="shortMealRadio" Value=@("Snack") /> @(" Snack")<br>
+    </InputRadioGroup>
+
+*@
+
+<br />
+<InputRadioGroup Name="shortMealRadio" @bind-Value="@selectedMeal">
+    @foreach (var meal in mealOptions)
+    {
+    <InputRadio Name="shortMealRadio" Value="@meal" /> @($" {meal}")<br>
+   
+    }
+</InputRadioGroup>
+
+<br />
+<div class="form-check">
+    <input class="form-check-input" type="checkbox" id="exampleCheckbox" @bind="acceptanceBox">
+    <label class="form-check-label" for="exampleCheckbox">
+        I accept the terms.
+    </label>
+</div>
+<br />
+<label>
+    Message
+    <textarea rows="5" cols="60" placeholder="enter a message"
+              @bind="MessageBody">@MessageBody</textarea>
+</label>
+<br />
+<button type="submit" @onclick="RadioCheckArea">
+    Radio/Check/Area Submit
+</button>
+<br/>
+<br/>
+<p>@feedback</p>
+@code {
+    private List<string> mealOptions = new List<string> { "Breakfast", "Lunch", "Supper","Snack" };
+    private string selectedMeal;
+    private bool acceptanceBox = false;
+    private string MessageBody;
+    private string feedback;
+ 
+
+    // [Parameter] public string DataToSend { get; set; }
+    // //this is a bound event handler delegate
+    // [Parameter] public EventCallback<string> OnDataSent { get; set; }
+
+
+
+    private void RadioCheckArea()
+    {
+        //feedback is filled then feedback fills DataToSend
+        feedback = $"Radio {selectedMeal} -- Terms {acceptanceBox} --  Message {MessageBody}";
+        //DataToSend = feedback ;
+
+        //evokes the EventCallback
+       // OnDataSent.InvokeAsync(DataToSend);
+    }
+
+
+}

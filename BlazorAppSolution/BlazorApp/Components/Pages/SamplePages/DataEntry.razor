@@ -1,0 +1,60 @@
+﻿@page "/dataentry"
+<PageTitle>Data Entry</PageTitle>
+@rendermode InteractiveServer
+
+<!-- reference the namespaces for the Employment class-->
+@using OOPsReview;
+
+
+<h1>Data Entry</h1>
+<p>practice data entry in a web page</p>
+
+@*
+    we wish to add a blockquote but center the control on the page
+    to do so, we will use bootstrap formating with rows/columns
+*@
+<div class="row">
+    <div class="offset-1 col-md-10">
+        <blockquote style="background-color:gainsboro;">
+            <p>
+                This component will demonstrate how your page can handle validation of data input,
+                showing validation messages when you have a number of controls for data entry. This
+                component will validate the locate controls and create any validation messages for
+                invalid data. The messages can be collected using various techniques such as: List or
+                Dictionary.
+            </p>
+            <p>
+                This page will input data for an instance of the Employment class. This demo will
+                use the Employment class from the OOPs review. The SupervisoryLevel enum
+                class will also be brought into this project. One could have included the entire
+                class library as part of this solution instead of bringing in individual classes.
+            </p>
+        </blockquote>
+    </div>
+</div>
+
+<!--
+    typically somewhere on your page you have a feedback area for messages to your user
+
+    You can divided this area in two:
+        successfull feedback
+        invalid (error/exception) feedback
+    -->
+<!--
+    Success area
+    check if there is a successful message to display
+
+    one could also have checked the string using Lenght > 0
+
+-->
+@if(!string.IsNullOrWhiteSpace(feedBackMsg))
+{
+    <div class="row alert alert-success text-center">
+        <p>@feedBackMsg</p>
+    </div>
+}
+
+
+@code {
+    private string feedBackMsg = "a feed back message";
+}
