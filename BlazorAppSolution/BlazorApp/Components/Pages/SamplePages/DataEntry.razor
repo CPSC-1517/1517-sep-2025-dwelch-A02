@@ -54,7 +54,201 @@
     </div>
 }
 
+<!--
+Error Message area
+check if there are any error messages, if so display them
+-->
+@if(errorMsgs.Count >0)
+{
+    <div class="row alert alert-danger">
+        <p>Please fix the following issues:</p>
+        <ul>
+            @foreach(var error in errorMsgs)
+            {
+                <!--
+                due to the structure of a Dictionary entry
+                there are two components: key and value
+                Here we wish to just use the value
+
+                If this was a List collection there is only
+                one component, the string
+                therefore you would NOT need the .Value
+                -->
+                <li>@error.Value</li>
+            }
+        </ul>
+    </div>
+}
+
+
+<!--
+form area
+standard html controls also demostration InputRadioGroup/InputRadio
+use bootstrap for formatting
+each control will be on a separate row
+each row is stack top to bottom
+-->
+
+<fieldset>
+    <legend>Employment Data</legend>
+    <!--
+    the structure of a row will contain 2 columns
+    1) will contain the label for the data entry
+    2) will contain the input control for the data entry
+    -->
+    <div class="row">
+        <div class="offset-4 col-md-2">
+            <label for="title">Position Title</label>
+        </div>
+        <div class="col-md-2">
+            <input type="text" id="title" placeholder="enter position"
+                @bind="empTitle" />
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class=" offset-4 col-md-2">
+            <label for="years">Years in Position</label>
+        </div>
+        <div class="col-md-2">
+            <!--
+                step is required so that the number can be entered with a decimal place
+                by default number type input controls are whole numbers
+                by default the step is 1
+            -->
+            <input type="number" id="years" placeholder="eg 3.4" style="width:75px;"
+                    step="0.1"  @bind="empYears" />
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class=" offset-4 col-md-2">
+            <label for="startdate">Start Date</label>
+        </div>
+        <div class="col-md-2">
+            <input type="date" id="startdate" 
+                   @bind="empStartDate" />
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="offset-4  col-md-2">
+            <label for="levels">Supervisory Level</label>
+        </div>
+        <div class="col-md-2">
+            <!-- we wish to select from a set of defined choices
+            this will limit the user to ONLY acceptable values
+            -->
+            <select id="levels" @bind="empLevelS">
+                <!-- the user must choose a supervisory level, therefore
+                there is no need for a prompt line on this select
+                -->
+                <!--
+                there is a line for each item in the Enum
+                you could hard-code each option tag
+
+                <option value="Entry">Entry</option>
+                <option value="TeamMember">TeamMember</option>
+                <option value="TeamLeader">TeamLeader</option>
+                <option value="Supervisory">Supervisory</option>
+                <option value="DepartmentHead">DepartmentHead</option>
+                <option value="Owner">Owner</option>
+                -->
+                <!--
+                you can also access the Enum definition and
+                extract each enum value (treating the Enum as a collection)
+                -->
+                @foreach(var item in Enum.GetValues(typeof(SupervisoryLevel)))
+                {
+                    //each Enum value will considered as a string
+                    //the value attribute is the value returned when a choice has been made
+                    //the string between the opening and closing tag will be displayed to the user
+                    <option value="@item">@item</option>
+                }
+            </select>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="offset-4  col-md-2">
+            <label for="levelr">Supervisory Level</label>
+        </div>
+        <div class="col-md-2">
+            <!-- we wish to select from a set of defined choices
+            this will limit the user to ONLY acceptable values
+
+            this control is not a standard html input control
+            this control is a Blazor control
+            this control needs to use bind-value instead of just bind
+            -->
+            <InputRadioGroup Name="supervisoryradio" @bind-Value="empLevelR">
+                @foreach (var item in Enum.GetValues(typeof(SupervisoryLevel)))
+                {
+                    //using the self closing version
+                    <InputRadio Name="supervisoryradio" Value="@item" />@($" {item}")<br />
+                }
+            </InputRadioGroup>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <button type="submit" class="btn btn-outline-primary rounded-pill"
+                    @onclick="OnCollect">
+                Submit
+            </button>
+            &nbsp;&nbsp
+            <button type="submit" class="btn btn-outline-secondary rounded-pill"
+                    @onclick="OnClear">
+                Clear
+            </button>
+
+        </div>
+    </div>
+</fieldset>
 
 @code {
-    private string feedBackMsg = "a feed back message";
+    private string feedBackMsg = "";
+
+    //could be using a List<string> as well as this Dictionary
+    //private List<string> errormsgs = new ();
+
+    //the Dictionary has a structure of 2 values: TKey (acts like a primary key)
+    //                                            TValue which is the string associated with the key
+    //one could search the dictionary on the TKey value and retrieve the TValue string
+    //NOTE: the TKey value MUST be unique within the entries of the Dictionary
+    //datat types for Tkey and TValue can be any value C# data type
+    private Dictionary<int, string> errorMsgs = new();
+
+    //employment data form variables
+    private string empTitle;
+    private double empYears = 0.0;
+    private DateTime empStartDate;
+
+    //for the SupervisoryLevel, the form will implement the control
+    // in two fashions: as a list (select) and as a set of RadioButtons
+    //only one of the variable will be used for actual data collection
+
+    private SupervisoryLevel empLevelS; //this will be used on the html select control
+    private SupervisoryLevel empLevelR; //this will be used on the Blazor control InputRadioGroup
+
+    protected void OnCollect()
+    {
+
+    }
+
+    protected void OnClear()
+    {
+
+    }
+
+    protected override void OnInitialized()
+    {
+        //leave the base call in so that the default initialization is done
+        base.OnInitialized();
+
+        //customize intialization;
+        empStartDate = DateTime.Today;
+
+    }
 }
