@@ -371,5 +371,42 @@ namespace OOPsReview
             }
             return true;
         }
+
+        //create a method that will receive a string and convert it to an acceptable
+        //     instance of this (Employment) class
+        //we are creating our own "Parse()" method
+        //this will ease the use of the class for an outside user similar to a int.Parse, double.Parse, etc.
+        //since this method will save no data and an instance of the class will yet to exist,
+        //      we make this method a static method
+
+        public static Employment Parse(string line) 
+        {
+            //split the string into their individual values
+            //use the .Split(delimiter) method; returns an array of values
+            //in a csv, the expected delimiter is a comma (,)
+            //However, you can use any character that is not expected in the "string"
+            //      as a delimiter
+            string[] datavalues = line.Split(','); 
+
+            //what if the file data is corrupted?
+            //test that sufficient data is on the file line
+            //test that the proper amount of data is on the file line
+            //when we create the instance, the class's internal validation will
+            //  validate the data is correct
+            if (datavalues.Length != 4) 
+            {
+                //any number of data values NOT equal to 4 indicates a corrupted record
+                //this record should not be processed
+                //this record should throw an exception
+                throw new FormatException($"Invalid record format: {line}");
+            }
+            //it appears that when one converts a string to an enum, even when you include the typeof(TEnum)
+            //  the software still wants you to typecast the return convert string.
+            return new Employment(datavalues[0], //boss
+                                  (SupervisoryLevel)Enum.Parse(typeof(SupervisoryLevel), datavalues[1]), //Owner
+                                  DateTime.Parse(datavalues[2]), //Oct 17 2020
+                                  double.Parse(datavalues[3])); //5
+           
+        }
     }
 }

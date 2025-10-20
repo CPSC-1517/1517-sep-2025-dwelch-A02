@@ -1,0 +1,134 @@
+﻿@page "/report"
+@rendermode InteractiveServer
+<PageTitle>Tabular Report</PageTitle>
+
+<!-- will be using OOPsReview Employment class-->
+@using OOPsReview;
+
+<h1>TubularReport</h1>
+<cite>using a scrolling tabular report</cite>
+<br />
+<br />
+
+<!-- blockquote is only here as a teaching aid. You do not necessarily need a blockquote on your screen-->
+<div class="row">
+    <div class="offset-1 col-md-10">
+        <blockquote style="background-color:gainsboro;">
+            <p>
+                This component will demonstrate file I/O reading a text (csv) file.
+                The access to the file will use relative addressing. This component will read
+                all records from the file, create a collection based on a class (Employment).
+                The collection will be displayed in a tabular form (table). This table will
+                demonstrate scrolling.
+            </p>
+        </blockquote>
+    </div>
+</div>
+
+<!-- user communication area-->
+@if (!string.IsNullOrWhiteSpace(feedBackMsg))
+{
+    <div class="row alert alert-success text-center">
+        <p>@feedBackMsg</p>
+    </div>
+}
+
+@if (errorMsgs.Count >0)
+{
+    <div class="row alert alert-danger">
+        <p>Please fix the following issues:</p>
+        <ul>
+            @foreach (var error in errorMsgs)
+            {
+                <!--
+                This is a List collection 
+                there is only one component, the string
+                therefore you would NOT need the .Value
+                -->
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+<!-- display-->
+<!--
+    display area
+
+    3 possible scenarios
+    a) no physical collection has been created
+            - no table should be display on the page
+    b) collection physically exists but is empty
+            - a message should be displayed to the user
+    c) collection physically exists and has records to display
+            - the records should be display in the desire output format.
+            - the file could be good or corrupted
+-->
+
+@if(employments == null)
+{
+    @* a *@
+    <p>Open an employment history file</p>
+}
+else if (employments.Count == 0)
+{
+    @* b *@
+    <p>Employment history file is empty, no data.</p>
+}
+else
+{
+    @*c 
+        create the table to display the data.
+    *@
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Level</th>
+                <th>Start Date</th>
+                <th>Years</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var empRow in employments)
+            {
+                <tr>
+                    <td>@empRow.Title</td>
+                    <td>@empRow.Level</td>
+                    <td>@empRow.StartDate</td>
+                    <td>@empRow.Years</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string feedBackMsg = "";
+    private List<string> errorMsgs = new();
+
+    //Employment variables
+    private List<Employment> employments;
+
+    //Is there any preset for this page? (OnInitialized())
+    //Do we wish the user to press a button see the report OR just show the report as the page comes up?
+    //Does the user need to locate and open a file? If so, there are button events to code.
+    //Does the report display a specific file all the time? If so, just display the file no button events.
+
+    //In this example, we will concentrate just on the display
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        //call a method to read and create the file collection
+        Reading();
+    }
+
+    private void Reading()
+    {
+        //Clear old messages
+        feedBackMsg = "";
+        errorMsgs.Clear();
+
+    }
+}
