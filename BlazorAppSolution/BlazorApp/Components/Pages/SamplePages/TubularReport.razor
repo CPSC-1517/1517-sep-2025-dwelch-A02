@@ -68,39 +68,63 @@
 @if(employments == null)
 {
     @* a *@
-    <p>Open an employment history file</p>
+     <div class="row alert alert-info text-center">
+        <p>Open an employment history file</p>
+    </div>
 }
 else if (employments.Count == 0)
 {
     @* b *@
-    <p>Employment history file is empty, no data.</p>
+     <div class="row alert alert-info text-center">
+        <p>Employment history file is empty, no data.</p>
+    </div>
 }
 else
 {
-    @*c 
+    @*       c 
         create the table to display the data.
+
+        //to reduce the number of data rows being displayed there are two techniques
+        //a) pagination
+        //b) scrolling
+
+        //this example uses the quick and easy technique of scrolling
+        //Note the table is surrounded by a div tag
+        //     on the div tag is 2 parameters
+        //      the class causes the scroll (built into bootstrap)
+        //      the style specifies the height of the display area
+        //to stick the Thead of the table in place
+        //      add the following styling to the thead tag:
+        //          style="position: sticky; top: 0; background-color:white;"
+
+        //depending on the zoom of window you may seem to lose some of the last line
     *@
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Level</th>
-                <th>Start Date</th>
-                <th>Years</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var empRow in employments)
-            {
-                <tr>
-                    <td>@empRow.Title</td>
-                    <td>@empRow.Level</td>
-                    <td>@empRow.StartDate</td>
-                    <td>@empRow.Years</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="row">
+        <div class="offset-2 col-md-8 overflow-scroll" style="height:450px">
+            <table class="table table-striped">
+                <thead style="position:sticky; top: 0; background-color:white;">
+                    <tr>
+                        <th>Title</th>
+                        <th>Level</th>
+                        <th>Start Date</th>
+                        <th>Years</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var empRow in employments)
+                    {
+                        <tr>
+                            <td>@empRow.Title</td>
+                            <td>@empRow.Level</td>
+                            <td>@empRow.StartDate.ToString("MMM dd, yyyy")</td>
+                            <td>@empRow.Years</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
 }
 
 @code {
@@ -130,5 +154,77 @@ else
         feedBackMsg = "";
         errorMsgs.Clear();
 
+        //there are a couple of ways to refer to your file and its path
+        //  i) obtain the root path of your application using an injection
+        //      service called IWebHostEnvironment via property injection (see variables)
+        //  ii) use relative addressing starting a the top of your application
+
+        //on this page we will demo (ii)
+        //assumes that the data file is within your web site file strucutre
+        //this addressing of the required file will start at the top
+        //  of your web application
+        //if your file is located within your web site structure there is no need
+        //  to obtain you absolute path to the file, instead, relative addressing
+        //  can be used
+        //syntax: @"./folderpathroute/.../.../filename"
+
+        //how can you setup the filenames for testing
+        //hard-code the paths
+         // string filename = @"./Components/Data/GoodEmployment.csv";
+        string filename = @"./Components/Data/GoodBadEmployment.csv";
+        // string filename = @"./Components/Data/EmptyEmployment.csv";  //case b
+        // string filename = @"./Components/Data/FileDoesNotExist.csv"; //case a
+
+        //get file
+        try
+        {
+            if (System.IO.File.Exists(filename))
+            {
+                //create an instance to the collection of history records
+                employments = new();
+
+                //read the file and create the collection
+                Array userdata  = null; //this variable will hold the records from the file
+                Employment employment = null;
+
+                userdata = System.IO.File.ReadAllLines(filename);
+
+                //traverse the array
+                //ensure that is sufficient data on the line to create the required instance
+                //create the employment instance
+
+                //the Employment class has in it a method that will validate the
+                //  string is properly formatted and will convert the string to an
+                //  instance of Employment
+                //if the string is not in the correct format, or a validation error
+                //  exists in the data, the Employment class will throw an exception
+                foreach (string line in userdata)
+                {
+                    employment = Employment.Parse(line);
+                    employments.Add(employment);
+                }
+            }
+            else
+            {
+                errorMsgs.Add($"System Error: File {filename} does not exist.");
+                //throw new Exception($"File {filename} does not exist.");
+            }
+        }
+        catch (ArgumentNullException ex)
+        {
+            errorMsgs.Add($"Missing Data Error: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            errorMsgs.Add($"Bad Data Error: {ex.Message}");
+        }
+        catch (FormatException ex)
+        {
+            errorMsgs.Add($"Record Format Error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            errorMsgs.Add($"System Error: {ex.Message}");
+        }
     }
 }
