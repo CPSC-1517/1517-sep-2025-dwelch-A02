@@ -1,0 +1,67 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+namespace WestWindSystem.Entities;
+
+[Index("CustomerID", Name = "CustomerID")]
+[Index("CustomerID", Name = "CustomersOrders")]
+[Index("SalesRepID", Name = "EmployeeID")]
+[Index("SalesRepID", Name = "EmployeesOrders")]
+[Index("OrderDate", Name = "OrderDate")]
+public partial class Order
+{
+    [Key]
+    public int OrderID { get; set; }
+
+    public int? SalesRepID { get; set; }
+
+    [Required]
+    [StringLength(5)]
+    public string CustomerID { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? OrderDate { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? RequiredDate { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime? PaymentDueDate { get; set; }
+
+    [Column(TypeName = "money")]
+    public decimal? Freight { get; set; }
+
+    public bool Shipped { get; set; }
+
+    [StringLength(40)]
+    public string ShipName { get; set; }
+
+    public int? ShipAddressID { get; set; }
+
+    [StringLength(250)]
+    public string Comments { get; set; }
+
+    [ForeignKey("CustomerID")]
+    [InverseProperty("Orders")]
+    public virtual Customer Customer { get; set; }
+
+    [InverseProperty("Order")]
+    public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+    [InverseProperty("Order")]
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+    [ForeignKey("SalesRepID")]
+    [InverseProperty("Orders")]
+    public virtual Employee SalesRep { get; set; }
+
+    [ForeignKey("ShipAddressID")]
+    [InverseProperty("Orders")]
+    public virtual Address ShipAddress { get; set; }
+
+    [InverseProperty("Order")]
+    public virtual ICollection<Shipment> Shipments { get; set; } = new List<Shipment>();
+}

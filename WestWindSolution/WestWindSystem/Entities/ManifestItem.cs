@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+namespace WestWindSystem.Entities;
+
+public partial class ManifestItem
+{
+    [Key]
+    public int ManifestItemID { get; set; }
+
+    public int ShipmentID { get; set; }
+
+    public int ProductID { get; set; }
+
+    public short ShipQuantity { get; set; }
+
+    [ForeignKey("ProductID")]
+    [InverseProperty("ManifestItems")]
+    public virtual Product Product { get; set; }
+
+    [ForeignKey("ShipmentID")]
+    [InverseProperty("ManifestItems")]
+    public virtual Shipment Shipment { get; set; }
+}
