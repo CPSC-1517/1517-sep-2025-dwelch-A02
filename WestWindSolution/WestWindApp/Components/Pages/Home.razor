@@ -1,7 +1,48 @@
 ﻿@page "/"
-
 <PageTitle>Home</PageTitle>
+
+<!-- Additional Namespaces-->
+@using WestWindSystem.BLL
+@using WestWindSystem.Entities
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+<p>WestWind database version</p>
+<p>Major: @buildVersion.Major</p>
+<p>MInor: @buildVersion.Minor</p>
+<p>Build: @buildVersion.Build</p>
+<p>Release Date: @buildVersion.ReleaseDate.ToString("MMM dd, yyyy")</p>
+
+
+@code {
+    //any service class that is not part of the C# defaults need to be injected
+    //since your services are extension services they are not part of the defaults
+    //  which means you have to inject the services
+    //one injects a class of services
+    //once the service class has been injected, the program will have access to
+    //  all service methods within the class
+
+    //property injection
+    [Inject]
+    public BuildVersionServices _buildVersionServices { get; set; }
+
+    //variable to capture the returned data from the service method
+    BuildVersion buildVersion { get; set; }
+
+    protected override void OnInitialized()
+    {
+        //default initialization of your page
+        base.OnInitialized();
+
+        //custom initialization
+        //consume a service method
+        //    a) the service class (injected)
+        //    b) the service method
+        //    c) does the service method have arguments than need to be supplied
+        //    d) returned data
+        buildVersion = _buildVersionServices.BuildVersion_Get();
+
+    }
+}
