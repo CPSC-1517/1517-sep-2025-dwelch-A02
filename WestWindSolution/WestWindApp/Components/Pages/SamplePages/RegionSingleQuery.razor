@@ -1,0 +1,124 @@
+﻿@page "/singlequery"
+<PageTitle>Single Query</PageTitle>
+
+<!-- Additional Namespaces-->
+@using WestWindSystem.BLL
+@using WestWindSystem.Entities
+
+<!-- 
+    REMEMBER!!!!!!!!!!!!!!!!!!!!!!!!!!
+    You need the following statement so your buttons will respond
+-->
+@rendermode InteractiveServer
+
+<h1>Region: Single Query</h1>
+<cite>... a single record query to the database</cite>
+<br/>
+<br/>
+@if (feedBackMsg.Length > 0)
+{
+    <div class="alert alert-info">
+        <p>@feedBackMsg</p>
+    </div>
+}
+<br />
+<br />
+@if (errorMsgs.Count > 0)
+{
+    <div class="alert alert-danger">
+        <p>Please fix the following issues:</p>
+        <ul>
+            @foreach (var error in errorMsgs)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+<br />
+<br />
+<!-- create the form for the query-->
+@*
+    form area
+        standard html controls
+        use bootstrap for formatting
+        form will be two column
+*@
+<div class="row">
+    <div class="col-md-6">
+        <!-- this column will hold the query input controls and buttons-->
+        <p><strong>Input query controls and buttons</strong></p>
+
+        <!-- the user will have to entered the search value -->
+        <label for="regionid">Enter a region id:</label>&nbsp;&nbsp;
+        <input id="regionid" type="number" @bind="entryarg"
+               style="width: 100px;" />&nbsp;&nbsp;
+        <button type="submit" @onclick="GetByEntry"
+                class="btn btn-outline-primary rounded-pill">
+            Fetch By Entry    
+        </button>
+        <br/><br/>
+        <!-- the user will select the search value from a given list -->
+        <label for="selectid">Select a region:</label>&nbsp;&nbsp;
+        <select id="selectid" @bind="selectionarg">
+            <option value="0">... select ...</option>
+            <!--
+                this collection for the loop will be a collection returned
+                    from the database
+                remember this should ONLY be consider IF your collection
+                    for the control is small, consider an upper limit of 100 records
+            -->
+            @foreach (var item in regionList)
+            {
+                <option value="@item.RegionID">@item.RegionDescription</option>
+            }
+        </select>&nbsp;&nbsp;
+        <button type="submit" @onclick="GetBySelection"
+                class="btn btn-outline-secondary rounded-pill">
+            Fetch By Selection
+        </button>
+    </div>
+
+    <div class="col-md-6">
+        <!-- this column will hold the query result output
+             no output attempt will be done unless the page actually
+                has something to display
+        -->
+    </div>
+</div>
+@code {
+    private string feedBackMsg = "";
+    private List<string> errorMsgs = new();
+
+    //variables for binding
+    private int entryarg = 0;
+    private int selectionarg = 0;
+
+    //variables for holding database returned data
+    private List<Region> regionList = new();
+
+    //inject any needed service classes
+    [Inject]
+    public RegionServices _regionServices { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        //load the collection required by the select control
+        //  so that the options appear
+        regionList = _regionServices.Region_GetAll();
+    }
+
+    //onclick event methods
+    public void GetByEntry()
+    {
+        
+    }
+
+    public void GetBySelection()
+    {
+
+    }
+}
