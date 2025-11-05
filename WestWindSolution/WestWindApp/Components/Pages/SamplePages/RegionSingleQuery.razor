@@ -54,7 +54,8 @@
         <input id="regionid" type="number" @bind="entryarg"
                style="width: 100px;" />&nbsp;&nbsp;
         <button type="submit" @onclick="GetByEntry"
-                class="btn btn-outline-primary rounded-pill">
+                class="btn btn-outline-primary rounded-pill"
+                style="width: 170px;">
             Fetch By Entry    
         </button>
         <br/><br/>
@@ -74,7 +75,8 @@
             }
         </select>&nbsp;&nbsp;
         <button type="submit" @onclick="GetBySelection"
-                class="btn btn-outline-secondary rounded-pill">
+                class="btn btn-outline-secondary rounded-pill"
+                style="width: 170px;">
             Fetch By Selection
         </button>
     </div>
@@ -84,6 +86,13 @@
              no output attempt will be done unless the page actually
                 has something to display
         -->
+        <p>this column is the output from the database</p>
+        <br/>
+        @if(info != null)
+        {
+            <p>Region id: @info.RegionID</p><br/>
+            <p>Region Description: @info.RegionDescription</p>
+        }
     </div>
 </div>
 @code {
@@ -96,6 +105,7 @@
 
     //variables for holding database returned data
     private List<Region> regionList = new();
+    private Region info = null;
 
     //inject any needed service classes
     [Inject]
@@ -114,11 +124,79 @@
     //onclick event methods
     public void GetByEntry()
     {
-        
+        //clear old messages
+        feedBackMsg = "";
+        errorMsgs.Clear();
+
+        //validate incoming data
+        if (entryarg <= 0)
+        {
+            //your message can be either in the feedbackMsg or errorMsgs
+            feedBackMsg = $"Region id {entryarg} is invalid. Region id must be greater than 0";
+        }
+        else
+        {
+            //data appears to be valid
+
+            //remember that you are leaving this project to another system
+            //  which could possible throw an exception
+            //this means that as you consume a service you should remember to
+            //  implement user friendly error handling
+
+            try
+            {
+                //consume a service to find the database data
+                info = _regionServices.Region_GetByID(entryarg);
+
+                //remember to communicate results with the user
+                if (info == null)
+                {
+                    feedBackMsg = $"Region id {entryarg} is not on file";
+                }
+            }
+            catch(Exception ex)
+            {
+                errorMsgs.Add($"System error: {ex.Message}");
+            }
+        }
     }
 
     public void GetBySelection()
     {
+        //clear old messages
+        feedBackMsg = "";
+        errorMsgs.Clear();
 
+        //validate incoming data
+        if (selectionarg == 0)  //is the dropdownlist still on the prompt line?
+        {
+            //your message can be either in the feedbackMsg or errorMsgs
+            feedBackMsg = $"You must select a region to view";
+        }
+        else
+        {
+            //data appears to be valid
+
+            //remember that you are leaving this project to another system
+            //  which could possible throw an exception
+            //this means that as you consume a service you should remember to
+            //  implement user friendly error handling
+
+            try
+            {
+                //consume a service to find the database data
+                info = _regionServices.Region_GetByID(selectionarg);
+
+                //remember to communicate results with the user
+                if (info == null)
+                {
+                    feedBackMsg = "Selected region is not on file";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMsgs.Add($"System error: {ex.Message}");
+            }
+        }
     }
 }
