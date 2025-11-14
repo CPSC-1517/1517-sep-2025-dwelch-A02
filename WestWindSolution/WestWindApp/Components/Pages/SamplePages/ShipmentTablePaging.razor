@@ -1,0 +1,181 @@
+﻿@page "/tablequery"
+<PageTitle>Table Query with Paging</PageTitle>
+@rendermode InteractiveServer
+
+<!-- additional namespaces-->
+@using WestWindSystem.BLL;
+@using WestWindSystem.Entities;
+
+<h1>Shipment Table with Paging</h1>
+<cite>... non primary key filter search</cite>
+<br/>
+@if (feedBackMsg.Length > 0)
+{
+    <div class="alert alert-info">
+        <p>@feedBackMsg</p>
+    </div>
+}
+<br />
+<br />
+@if (errorMsgs.Count > 0)
+{
+    <div class="alert alert-danger">
+        <p>Please fix the following issues:</p>
+        <ul>
+            @foreach (var error in errorMsgs)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+<br />
+<div class="row">
+    <div class="col-md-3">
+        <label for="yearid">Enter a shipment year:</label>&nbsp;&nbsp;
+        <input id="yearid" type="number" @bind="yeararg"
+               style="width: 100px;" />
+        <br /><br />
+        <label for="monthid">Enter a shipment month:</label>&nbsp;&nbsp;
+        <input id="monthid" type="number" @bind="montharg"
+               style="width: 100px;" />
+        <br /><br />
+        <button type="submit" @onclick="GetShipments"
+                class="btn btn-outline-primary rounded-pill"
+                style="width: 170px;">
+            Fetch Shipments
+        </button>
+    </div>
+    <div class="col-md-8">
+        @if (shipmentList == null)
+        {
+            <!-- a -->
+            <p>Enter a year and month for your search.</p>
+        }
+        else if (shipmentList.Count == 0)
+        {
+            <!-- b -->
+            <p>No data found for year @yeararg and month @montharg.</p>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Order</th>
+                        <th>Date</th>
+                        <th>shipper</th>
+                        <!-- align="right" does not work on column headers-->
+                        <th>Freight $</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in shipmentList)
+                    {
+                        <tr>
+                            <td>@item.ShipmentID</td>
+                            <td>@item.OrderID</td>
+                            <td>@item.ShippedDate.ToString("MMM dd, yyyy")</td>
+                            @* <td>@item.ShipVia</td> *@
+                            @* use the navigational property of the shipment
+                                    instance to obtain data from the associated
+                                    instance
+
+                            *@
+                            <td>@item.ShipViaNavigation.CompanyName</td>
+                            <td align="right">@string.Format("{0:#,##0.00}",item.FreightCharge)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    private string feedBackMsg = "";
+    private List<string> errorMsgs = new();
+
+    // bind variables
+    private int yeararg = 0;
+    private int montharg = 0;
+    private List<Shipment> shipmentList = null;
+
+    //injected services
+    [Inject]
+    public ShipmentServices _shipmentServices { get; set; }
+
+    //navigationsal matching
+    [Inject]
+    public ShipperServices _shipperServices { get; set; }
+    private List<Shipper> shipperList = null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        //custom initialization
+        yeararg = DateTime.Today.Year;
+        montharg = DateTime.Today.Month;
+
+        //there are two techniques to allow the use of navigational properties on your page
+        //      a) bring in a dataset of the table to which you are attempting to navigate
+        //      b) use the .Include method on the query itself (see Shipment query 
+        //          for this technique in BLL ShipmentServices)
+
+        // Technique (a)
+        // this data set is needed to handle the navigation reference used on the table data cell
+        //           to display the shipper company name
+        // no other coding is needed, the system will match up the dataset to the usage in the 
+        //     table above
+       // shipperList = _shipperServices.Shipper_GetAll();
+    }
+
+    //button event handling
+    private void GetShipments()
+    {
+        //clear old messages and data
+        feedBackMsg ="";
+        errorMsgs.Clear();
+        shipmentList = null;
+
+        //validate incoming argument values
+        //definitely validate if the user can enter data values
+        //optionally if the data is from a list produce by
+        //  the program of a volid collection. Usually done
+        //  if there is a prompt on the selection list
+        //Also if there is a set limit or range
+
+        if (yeararg < 1950 || yeararg > DateTime.Today.Year)
+        {
+            errorMsgs.Add($"Invalid year {yeararg}. Year must be between 1950 and {DateTime.Today.Year}");
+        }
+        if (montharg < 1 || montharg > 12)
+        {
+            errorMsgs.Add($"Invalid month {montharg}. Month must be between 1 and 12");
+        }
+
+        //can I proceed with the query?
+        if( errorMsgs.Count == 0)
+        {
+            //assume the incoming data values are good
+            //consume the need query service
+
+            //since the application is leaving this app to another location
+            //   and that location could throw an exception, remember to
+            //   use try/catch
+            try
+            {
+                //consume the service method
+                shipmentList = _shipmentServices.Shipment_GetByYearandMonth(yeararg, montharg);
+
+            }
+            catch(Exception ex)
+            {
+                errorMsgs.Add($"System Error: {ex.Message}");
+            }
+        }
+    }//eom
+
+}
