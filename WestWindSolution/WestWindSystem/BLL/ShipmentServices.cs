@@ -48,6 +48,7 @@ namespace WestWindSystem.BLL
         //    return info.ToList();
         //}
 
+        //this query is used if you are using scrolling on your web page
         public List<Shipment> Shipment_GetByYearandMonth(int year, int month)
         {
 
@@ -75,6 +76,70 @@ namespace WestWindSystem.BLL
                                                         && x.ShippedDate.Month == month)
                                                 .OrderBy(x => x.ShippedDate);
             return info.ToList();
+        }
+
+        //Pagination
+        //return the total number of records that would be returned for the query
+        //this query will NOT return any actual query result records
+        public int Shipment_GetByYearandMonthCount(int year, int month)
+        {
+
+            if (year < 1950 || year > DateTime.Today.Year)
+            {
+                throw new ArgumentException($"Year {year} is invalid. Year must be between 1950 and today.");
+            }
+            if (month < 1 || month > 12)
+            {
+                throw new ArgumentException($"Month {month} is invalid. Month must be between 1 and 12.");
+            }
+
+            //execute the query without any additional methods use to join other tables or organize the 
+            //   queried dataset
+            //use .Count() to obtain the number of rows
+            int info = _context.Shipments
+                                .Where(x => x.ShippedDate.Year == year
+                                        && x.ShippedDate.Month == month)
+                                .Count();
+            return info;
+
+            //return _context.Shipments
+                                //.Where(x => x.ShippedDate.Year == year
+                                //        && x.ShippedDate.Month == month)
+                                //.Count();
+        }
+
+        public List<Shipment> Shipment_GetByYearandMonthPaging(int year, int month, int currentpagenumber, int itemperpage)
+        {
+            //this method will return the data set records that are NEEDED for the current page
+            //it does NOT return the entire data set collection
+            //the method needs to determine the record subset to return
+            if (year < 1950 || year > DateTime.Today.Year)
+            {
+                throw new ArgumentException($"Year {year} is invalid. Year must be between 1950 and today.");
+            }
+            if (month < 1 || month > 12)
+            {
+                throw new ArgumentException($"Month {month} is invalid. Month must be between 1 and 12.");
+            }
+
+            //even for paging you still need the complete query data set
+            //  in the organization of all records
+            IEnumerable<Shipment> info = _context.Shipments
+                                                .Include(x => x.ShipViaNavigation)
+                                                .Where(x => x.ShippedDate.Year == year
+                                                        && x.ShippedDate.Month == month)
+                                                .OrderBy(x => x.ShippedDate);
+
+            //paging calculations
+            //calculate the number of records to skip
+            //subtract 1 from the natural page number (currentpagenumber) to get the page index number
+            int recordsSkipped = itemperpage * (currentpagenumber - 1);
+
+            //return JUST the records for the page
+            //Skip: skip the first x items representing previous pages
+            //Take: take up to the necessary number of items on a page
+
+            return info.Skip(recordsSkipped).Take(itemperpage).ToList();
         }
         #endregion
     }
