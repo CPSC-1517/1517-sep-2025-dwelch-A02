@@ -7,11 +7,6 @@ using WestWindSystem.Entities;
 
 namespace WestWindSystem.DAL;
 
-/*
- * the internal access level restricts calls to this class to ONLY other
- *  classes/methods within the library
- */
-
 internal partial class WestWindContext : DbContext
 {
     public WestWindContext(DbContextOptions<WestWindContext> options)
@@ -57,7 +52,7 @@ internal partial class WestWindContext : DbContext
 
         modelBuilder.Entity<BuildVersion>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__BuildVer__3214EC07ECBE05E2");
+            entity.HasKey(e => e.Id).HasName("PK__BuildVer__3214EC07AAAEEBE3");
 
             entity.Property(e => e.ReleaseDate).HasDefaultValueSql("(getdate())");
         });
@@ -105,7 +100,7 @@ internal partial class WestWindContext : DbContext
 
         modelBuilder.Entity<ManifestItem>(entity =>
         {
-            entity.HasKey(e => e.ManifestItemID).HasName("PK__Manifest__9000192CED9A3563");
+            entity.HasKey(e => e.ManifestItemID).HasName("PK__Manifest__9000192C704F3F8E");
 
             entity.HasOne(d => d.Product).WithMany(p => p.ManifestItems)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -201,7 +196,7 @@ internal partial class WestWindContext : DbContext
 
         modelBuilder.Entity<Shipment>(entity =>
         {
-            entity.HasKey(e => e.ShipmentID).HasName("PK__Shipment__5CAD378DE98CC61C");
+            entity.HasKey(e => e.ShipmentID).HasName("PK__Shipment__5CAD378DAD276802");
 
             entity.HasOne(d => d.Order).WithMany(p => p.Shipments)
                 .OnDelete(DeleteBehavior.ClientSetNull)

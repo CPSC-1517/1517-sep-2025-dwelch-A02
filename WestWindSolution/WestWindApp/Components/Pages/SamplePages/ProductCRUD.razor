@@ -1,0 +1,175 @@
+﻿@page "/productcrud"
+<PageTitle>Product CRUD</PageTitle>
+@rendermode InteractiveServer
+
+<!-- Additional namespaces-->
+
+@using WestWindSystem.BLL;
+@using WestWindSystem.Entities;
+
+<h1>Product CRUD</h1>
+<cite> ... demonstrating CRUD using EditForm</cite>
+
+<br />
+<br />
+@if (feedBackMsg.Length > 0)
+{
+    <div class="alert alert-info">
+        <p>@feedBackMsg</p>
+    </div>
+}
+<br />
+<br />
+@if (errorMsgs.Count > 0)
+{
+    <div class="alert alert-danger">
+        <p>Please fix the following issues:</p>
+        <ul>
+            @foreach (var error in errorMsgs)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+<br />
+<br />
+
+<!-- EditForm
+
+this groups a bunch of controls as a single form
+allows for adding additonal options to integrate with your form controls
+contains a set of enhanced input controls
+
+register an EditContext instance for this form
+
+DataAnnotationsValidator
+
+the DataAnnotationsValidator component is used within an
+EditForm to enable validation based on data annotations
+        applied to model properties.
+
+ValidationSummary
+
+displays a list of all validation errors
+show a summary of errors at the top of the form
+errors can be from model properties or custom messages
+this is optional
+
+ValidationMessage
+
+displays the message associated with the indicated entity field
+this is optional
+
+-->
+
+<EditForm EditContext="editContext">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <!--
+        the form controls will appear between the start and end EditForm tags
+
+        what about format layout
+        you can use your normal formatting (eg bootstrap) in laying out your form
+    -->
+    <div class="row">
+        <div class="offset-1 col-md-4">
+            <label for="productid" class="form-label">Product ID</label>
+
+            <!--
+            We can use enhanced input type controls with EditForm
+            No type attribute is need for the EditForm control, the type in
+               is built into the control
+            Binding parameter: bind-Value is required when using EditForm controls
+
+            Since the pkey for Productid is an identity key, the user should not be
+                able to alter the field. Use the attribute "readonly" to restrict data entry
+            -->
+
+            <InputNumber id="productid" class="form-control"
+                        @bind-Value="currentProduct.ProductID"
+                        style="width: 75px;" readonly/>
+            <br/>
+            <label for="productname" class="form-label">Name</label>
+            <InputText id="productname" class="form-control"
+                        @bind-Value="currentProduct.ProductName"/>
+            <!--
+                immediately after your input control you can add the validation
+                    message tag IF you want your messages immediately after the control
+
+                you can omit this control and still display an error message associated
+                    with this control with the ValidationSummary
+            -->
+            <ValidationMessage For="@(() => currentProduct.ProductName)"/>
+            <br/>
+            <!-- Foreign Keys-->
+            <!--
+                foreign keys should be handled in a way that the contents
+                    for selection is limited to the possible values on
+                    the database
+            -->
+            <label for="categoryid" class="form-label">Category</label>
+            <InputSelect id="categoryid" class="form-control"
+                    @bind-Value="currentProduct.CategoryID">
+                <option value="0">... select category ...</option>
+                @foreach(var item in categoryList)
+                {
+                    <option value="@item.CategoryID">@item.CategoryName</option>
+                }
+            </InputSelect>
+            <!--
+                the validation messages that will appear in this control will
+                    come from custom validation done within the event button method
+            -->
+            <ValidationMessage For="@(() => currentProduct.CategoryID)" />
+            <br/>
+            <label for="supplierid" class="form-label">Supplier</label>
+            <InputSelect id="supplierid" class="form-control"
+                         @bind-Value="currentProduct.SupplierID">
+                <option value="0">... select supplier ...</option>
+                @foreach (var item in supplierList)
+                {
+                    <option value="@item.SupplierID">@item.CompanyName</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => currentProduct.SupplierID)" />
+            <br />
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private string feedBackMsg = "";
+    private List<string> errorMsgs = new();
+
+    // EditForm properties and variables
+    // will hold the instance of the data Model that is being maintained on the control
+    private EditContext editContext;
+
+    //this is the instance of the entity Product that will hold the data of the form
+    //this instance will be tied to the editContext
+    private Product currentProduct = new();
+
+    // foreign key fields
+    [Inject]
+    public CategoryServices _categoryServices{ get; set; }
+    private List<Category> categoryList = new();
+
+    [Inject]
+    public SupplierServices _supplierServices{ get; set; }
+    private List<Supplier> supplierList = new();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        //create the EditContext instance AND tie to the instance of the entity of the form
+        editContext = new EditContext(currentProduct);
+
+        //fill the foreign key field collections
+        categoryList = _categoryServices.Category_GetAll();
+        supplierList = _supplierServices.Supplier_GetAll();
+    }
+
+}
