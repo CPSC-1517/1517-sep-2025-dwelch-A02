@@ -18,8 +18,7 @@
         <p>@feedBackMsg</p>
     </div>
 }
-<br />
-<br />
+
 @if (errorMsgs.Count > 0)
 {
     <div class="alert alert-danger">
@@ -136,7 +135,44 @@ this is optional
             <ValidationMessage For="@(() => currentProduct.SupplierID)" />
             <br />
         </div>
+        <div class="offset-1 col-md-4">
+            <label for="qtyperunit" class="form-label">Qty / Unit</label>
+            <InputText id="qtyperunit" class="form-control"
+                       @bind-Value="currentProduct.QuantityPerUnit" />
+            <ValidationMessage For="@(() => currentProduct.QuantityPerUnit)" />
+            <br />
+            <label for="minqty" class="form-label">Min Order Qty</label>
+            <InputNumber id="minqty" class="form-control"
+                         @bind-Value="currentProduct.MinimumOrderQuantity" />
+            <ValidationMessage For="@(() => currentProduct.MinimumOrderQuantity)" />
+            <br />
+            <label for="unitprice" class="form-label">Unit Price</label>
+            <InputNumber id="unitprice" class="form-control"
+                         @bind-Value="currentProduct.UnitPrice" />
+            <ValidationMessage For="@(() => currentProduct.UnitPrice)" />
+            <br />
+            <label for="unitsonorder" class="form-label">Units on Order</label>
+            <InputNumber id="unitsonorder" class="form-control"
+                         @bind-Value="currentProduct.UnitsOnOrder" />
+            <ValidationMessage For="@(() => currentProduct.UnitsOnOrder)" />
+        </div>
     </div>
+    <br/><br/>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <button type="button" class="btn btn-outline-primary rounded-pill"
+                    @onclick="OnCreate" style="width:160px;">
+                Create
+             </button>
+             &nbsp;&nbsp;
+            <button type="button" class="btn btn-outline-secondary rounded-pill"
+                    @onclick="OnClear" style="width:160px;">
+                Clear
+            </button>
+        </div>
+    </div>
+
+
 </EditForm>
 
 @code {
@@ -146,6 +182,10 @@ this is optional
     // EditForm properties and variables
     // will hold the instance of the data Model that is being maintained on the control
     private EditContext editContext;
+
+    //will be used to place custom event validation messages into the same controls
+    //  used by DataAnnotationsValidator
+    private ValidationMessageStore validationMessageStore;
 
     //this is the instance of the entity Product that will hold the data of the form
     //this instance will be tied to the editContext
@@ -160,6 +200,9 @@ this is optional
     public SupplierServices _supplierServices{ get; set; }
     private List<Supplier> supplierList = new();
 
+    [Inject]
+    public ProductServices _productServices { get; set; }
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -167,9 +210,131 @@ this is optional
         //create the EditContext instance AND tie to the instance of the entity of the form
         editContext = new EditContext(currentProduct);
 
+        //create validation MessageStore instance and indicate which EditContext it is
+        //      associated with
+        //needed for custom validation within the event code and
+        //   allows the user to use the ValidationMesssage controls of the form
+        validationMessageStore = new ValidationMessageStore(editContext);
+
         //fill the foreign key field collections
         categoryList = _categoryServices.Category_GetAll();
         supplierList = _supplierServices.Supplier_GetAll();
     }
 
+    private void OnCreate()
+    {
+        //clear out old messages
+        feedBackMsg = "";
+        errorMsgs.Clear();
+        validationMessageStore.Clear();
+
+        try
+        {
+            // the first test is to check to see if there are ANY errors already
+            // caught by the form using the DataAnnotationsValidator?
+            if(editContext.Validate())
+            {
+                //no errors on the form at this time
+
+                //if there are additional custom validation of your data
+                //      you can still do that within the event coding
+
+                //custom validation for this form will check to see if a category
+                //   and supplier have been select (why: the list have a prompt that
+                //   has a non valid sql foreign key value)
+
+                //Problem:
+                //CategoryID is an integer
+                //the default of an integer is 0 ( a value)
+                //NO foreign key/primary key on the database is 0
+
+                //if a proper selection is not done, then when the
+                //       record is attempted to be added to the the database
+                //       the database will thrown an exception
+
+                //Solution: custom validation
+                if (currentProduct.CategoryID == 0)
+                {
+                    // construction of the validation message store command
+                    //     .Add to your instance of the form for the indicated field
+                    //parameter 1: the associated field to display the message
+                    //               looking for the "field identifier"
+                    //               use nameof(xxx) to supplier the
+                    //               "field identifier"
+                    //               example: editContext.Field(nameof(CurrentProduct.CategoryID))
+                    //parameter 2: the message to display
+                    //             example: "You must select a category"
+                    validationMessageStore.Add(editContext.Field(nameof(currentProduct.CategoryID)),
+                                                "You must select a category.");
+                }
+                if (currentProduct.SupplierID == 0)
+                {
+                    validationMessageStore.Add(editContext.Field(nameof(currentProduct.SupplierID)),
+                                                "You must select a supplier.");
+                }
+                if(currentProduct.UnitPrice < 0.0m)
+                {
+                    validationMessageStore.Add(editContext.Field(nameof(currentProduct.UnitPrice)),
+                                               "Unit price cannot be negative.");
+                }
+
+                //once your custom validation is done, if there was any, you can check to see
+                //      what your validationMessageStore contains
+                //if there are any new messages , indicate to the form that the store
+                //      has been altered
+                //to do this, we will use the Linq method .Any()  to determine if
+                //      something exists
+                //NOTE: the .Any() returns only a true or false; it does NOT return an actual records
+                //      the .Where() returns actual record
+
+                if(editContext.GetValidationMessages().Any())
+                {
+                    editContext.NotifyValidationStateChanged();
+                }
+                else
+                {
+                    //the program assumes that the data is clean and can be further processed
+
+                    //call the product services to receive the "good" data
+                    //      and add it to the database (CREATE!!!)
+                    //call the appropriate service method and pass the current product instance
+                    //      the service method will return the new (identity) primary key value.
+                    int newProductId = _productServices.Product_Add(currentProduct);
+
+                    //feedback to user on success
+                    feedBackMsg=$"{currentProduct.ProductName} (ID:{newProductId}) has been added to file.";
+
+                }
+            }
+
+        }
+        catch(Exception ex)
+        {
+            feedBackMsg=$"System Error: {ex.Message}";
+        }
+    }
+
+    private void OnClear()
+    {
+        //clear out old messages
+        feedBackMsg = "";
+        errorMsgs.Clear();
+
+        //remove any old custom error messages placed in the Validation Message
+        //      store
+        validationMessageStore.Clear();
+
+        //clear out the old values
+        //clear the current product instance of any data
+        //      (not using local variables)
+        //notice that the "system" constructor is used as the entity has
+        //      NO constructor code within it
+        currentProduct = new Product();
+
+        // IMPORTANT!!!!!!!!!!!!!!!!!!
+        // the editContext is associated with the current product instance
+        // the editContext REQUIRES to be reset to the NEW current product
+        //          instance
+        editContext = new EditContext(currentProduct);
+    }
 }

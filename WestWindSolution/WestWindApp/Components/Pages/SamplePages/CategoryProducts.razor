@@ -1,0 +1,164 @@
+@page "/categoryproducts"
+<PageTitle>Category Products</PageTitle>
+@rendermode InteractiveServer
+@using WestWindSystem.Entities;
+@using WestWindSystem.BLL;
+
+<h1>Category Products</h1>
+<h4>... select category to view products</h4>
+
+<!-- area to feedback messages-->
+@if (feedBackMessage.Length > 0)
+{
+    <div class="alert alert-info">
+        <p>@feedBackMessage</p>
+    </div>
+}
+<!-- area to error messages-->
+@if (errorMsgs.Count > 0)
+{
+    <div class="alert alert-danger">
+        <p>Please fix the following issues:</p>
+        <ul>
+            @foreach (var error in errorMsgs)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <label for="catlist">Select Product Category:</label>
+        &nbsp;&nbsp;
+        <select id="catlist" @bind="CategoryId">
+            <option value="0">select category ...</option>
+            @foreach(var cat in categoryList)
+            {
+                <option value="@cat.CategoryID">@cat.CategoryName</option>
+            }
+        </select>
+        &nbsp;&nbsp;
+        <button type="submit" class="btn btn-outline-primary rounded-pill"
+        @onclick="FetchProducts">Fetch Products</button>
+       
+
+    </div>
+</div>
+<br/><br/>
+<div class="row">
+    @if(productList != null)
+    {
+        @if (productList.Count > 0)
+        {
+            <div class="offset-2 col-md-8 overflow-scroll" style="height:450px;">
+                <table class="table table-striped">
+                    <thead style="position:sticky; top:0; background-color:white;">
+                        <tr>
+                           
+                            <th>Product</th>
+                            <th>Unit Size</th>
+                            <th>Company Name</th>
+                            <th>Disc.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(Product item in productList)
+                        {
+                           
+                            <tr>
+                              
+                                <td>@item.ProductName</td>
+                                <td>@item.QuantityPerUnit</td>
+                                <td> @item.Supplier.CompanyName</td>
+                                <td>@(item.Discontinued ? "Yes" : " ")</td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        }
+        else
+        {
+            if (CategoryId > 0)
+            {
+                <div class="offset-3 col-md-6 text-center" style="font-size:48px">
+                    <p>No products for the selected category</p>
+                </div>
+            }
+        } 
+    }
+
+</div>
+
+<!-- create a filter input area
+drop down list of category names to select from
+
+-->
+@code {
+
+    private string feedBackMessage = "";
+    private List<string> errorMsgs { get; set; } = new List<string>();
+
+    //inject the CategoryService into the page
+    //this will allow access to the methods in the CategoryService BLL class
+    [Inject]
+    private CategoryServices _categoryServices { get; set; }
+    private List<Category> categoryList { get; set; }
+    private int CategoryId { get; set; }
+
+    //inject the ProductService into the page
+    [Inject]
+    private ProductServices _productServices { get; set; }
+    private List<Product> productList { get; set; } 
+
+
+    //inject the SupplyService into the page
+    [Inject]
+    private SupplierServices _supplierServices { get; set; }
+    private List<Supplier> supplierList { get; set; }
+
+    [Inject]
+    private NavigationManager _navManager { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        //retrieve the list of category via the CategoryServices in your BLL
+        categoryList = _categoryServices.Category_GetAll();
+        //retrieve the list of supplier via the SupplierServices in your BLL
+        supplierList = _supplierServices.Supplier_GetAll();
+        
+    }
+
+
+    private void FetchProducts()
+    {
+        //fetch the list of products depending of the category selection
+        //if no category was selected display a message and clear old product display
+
+        //clear old message and old data presentation
+        feedBackMessage = "";
+        errorMsgs.Clear();
+
+        //due to the way that the product list is handled for the table
+        //  the productlist may be null
+        if(productList != null)
+            productList.Clear();
+
+        //validation
+        if (CategoryId == 0)
+        {
+            //is it an error OR do I need to inform the user that they need to do a simply action
+            feedBackMessage = "You need to select a category to view its products";
+        }
+        else
+        {
+            productList = _productServices.Product_GetByCategoryID(CategoryId);
+        }
+    }
+
+   
+}
