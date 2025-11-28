@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,9 +26,19 @@ namespace WestWindSystem.BLL
         #region Queries
         public List<Product> Product_GetByCategoryID(int categoryid)
         {
-            IEnumerable<Product>info = _context.Products
-                                        .Where(x => x.CategoryID == categoryid);
-            return info.OrderBy(x => x.ProductName).ToList();
+            //IEnumerable<Product>info = _context.Products
+            //                            .Where(x => x.CategoryID == categoryid);
+            //return info.OrderBy(x => x.ProductName).ToList();
+
+            return _context.Products
+                           .Where(x => x.CategoryID == categoryid)
+                           .OrderBy(x => x.ProductName)
+                           .ToList();
+        }
+
+        public Product Product_GetByProductID(int productid)
+        {
+            return _context.Products.FirstOrDefault(x => x.ProductID == productid);
         }
         #endregion
 
@@ -113,6 +124,58 @@ namespace WestWindSystem.BLL
 
 
             return item.ProductID;
+        }
+
+        public int Product_Update(Product item)
+        {
+            //was data passed
+            if (item == null)
+                throw new ArgumentNullException("Product information not submitted");
+
+            //does the pkey exist?
+            //check via a readonly query that your record target actually exists
+            //on the update, this means a simple Any() test
+            if(!_context.Products.Any(x => x.ProductID == item.ProductID))
+                throw new ArgumentException($"{item.ProductName}  of size " +
+                           $"{item.QuantityPerUnit} does not exist on file. Please check for product again.");
+
+            //are there any other business rules to check
+            //YOU MAY NOT HAVE ANY OTHER BUSINESS RULES TO CHECK!!!!!!!!!!!!!!!!!!!
+            //An example of business rules for this demo could be that the product
+            //  a) is not from the same supplier
+            //  b) with the same product name
+            //  c) having the same quantity per unit
+            // AND for update
+            //  d) is NOT the current product (all other products)
+            bool exist = false;
+            exist = _context.Products
+                        .Any(x => x.SupplierID == item.SupplierID
+                                && x.ProductName.Equals(item.ProductName)
+                                && x.QuantityPerUnit == item.QuantityPerUnit
+                                && x.ProductID != item.ProductID); //all other products
+            if (exist)
+                throw new ArgumentException($"{item.ProductName} from " +
+                            $"{item.Supplier.CompanyName} of size " +
+                            $"{item.QuantityPerUnit} already on file.");
+
+            //after all business rules have been passed, you can assume the 
+            //  data is good to be placed on the database
+
+
+
+            //there is two steps to complete the process of adding your data to the database
+            // a) Staging
+            // b) Commit
+
+            //Staging
+
+            EntityEntry<Product> updating = _context.Entry(item);
+            updating.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+
+            //Commit
+        
+            return _context.SaveChanges(); //if successful, data is committed AND returns rowsaffected count
+
         }
         #endregion
     }

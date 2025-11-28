@@ -56,7 +56,7 @@
                 <table class="table table-striped">
                     <thead style="position:sticky; top:0; background-color:white;">
                         <tr>
-                           
+                           <th>&nbsp;</th>
                             <th>Product</th>
                             <th>Unit Size</th>
                             <th>Company Name</th>
@@ -66,9 +66,19 @@
                     <tbody>
                         @foreach(Product item in productList)
                         {
-                           
+                            // the link on the display line will send the display to the crud page
+                            // HOWEVER, an important piece of data also needs to be send to the crud page
+                            //          that piece of data is the pkey of the product to display on
+                            //                  the crud
+                            // Solution: The "View" needs to be an anchor tag to be able to transfer
+                            //              the user to the CRUD page
+                            //           we can add that information to the href as a routing parameter
+                            //           the crud page will need to alter its @page directive to capture
+                            //                the routing parameter
+                            //           on this page add the parameter value to send with the href
+
                             <tr>
-                              
+                                <td><a href="productcrud/@item.ProductID">View</a></td>
                                 <td>@item.ProductName</td>
                                 <td>@item.QuantityPerUnit</td>
                                 <td> @item.Supplier.CompanyName</td>
