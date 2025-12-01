@@ -164,7 +164,7 @@ this is optional
             <br />
             <label for="unitprice" class="form-label">Unit Price</label>
             <InputNumber id="unitprice" class="form-control"
-                         @bind-Value="currentProduct.UnitPrice" />
+                         @bind-Value="FormatUnitPrice" />
             <ValidationMessage For="@(() => currentProduct.UnitPrice)" />
             <br />
             <label for="unitsonorder" class="form-label">Units on Order</label>
@@ -186,9 +186,21 @@ this is optional
                 Save
             </button>
             &nbsp;&nbsp;
+           
+            <button type="button" class="btn btn-outline-secondary rounded-pill"
+            @onclick="OnDiscontinue" style="width:160px;">
+                Discontinue
+            </button>
+          
+            &nbsp;&nbsp;
             <button type="button" class="btn btn-outline-secondary rounded-pill"
                     @onclick="OnClear" style="width:160px;">
                 Clear
+            </button>
+            &nbsp;&nbsp;
+            <button type="button" class="btn btn-outline-secondary rounded-pill"
+                    @onclick="OnGoToSearch" style="width:160px;">
+                Search
             </button>
         </div>
     </div>
@@ -228,6 +240,8 @@ this is optional
     [Inject]
     public IJSRuntime jSRuntime { get; set; }
 
+    [Inject]
+    public NavigationManager navigationManager { get; set; }
 
     //parameter setup for receiving the incoming value
     //declare the routing parameter
@@ -238,6 +252,15 @@ this is optional
     //                  datatype on the page directive
     [Parameter]
     public int? productid { get; set; }
+
+    //this property is used to format the UnitPrice to 2 decimal places
+    //it is with this property that the data is extracted and set to the
+    //      actual property in the product instance
+    private decimal FormatUnitPrice
+    {
+        get { return Math.Round(currentProduct.UnitPrice, 2); }
+        set { currentProduct.UnitPrice = value; }
+    }
 
     protected override void OnInitialized()
     {
@@ -421,6 +444,103 @@ this is optional
         }
     }
 
+    private void OnDiscontinue()
+    {
+        //clear out old messages
+        feedBackMsg = "";
+        errorMsgs.Clear();
+        validationMessageStore.Clear();
+
+        try
+        {
+            //the custom validation is dependent on how you manage your
+            //  product service method
+            //a) if you are NOT doing to use the incoming data to update
+            //   your product before setting the Discontinued field to true
+            //   then you do NOT need to do this custom validation
+            //OR
+            //b) you are doing to allow update and discontinue to happen on
+            //      the discontinue THEN you DO need to do this custom validation
+            if (editContext.Validate())
+            {
+                if (currentProduct.CategoryID == 0)
+                {
+                    validationMessageStore.Add(editContext.Field(nameof(currentProduct.CategoryID)),
+                                                "You must select a category.");
+                }
+                if (currentProduct.SupplierID == 0)
+                {
+                    validationMessageStore.Add(editContext.Field(nameof(currentProduct.SupplierID)),
+                                                "You must select a supplier.");
+                }
+                if (currentProduct.UnitPrice < 0.0m)
+                {
+                    validationMessageStore.Add(editContext.Field(nameof(currentProduct.UnitPrice)),
+                                               "Unit price cannot be negative.");
+                }
+
+                if (editContext.GetValidationMessages().Any())
+                {
+                    editContext.NotifyValidationStateChanged();
+                }
+                else
+                {
+                    //call the discontinued (aka Logical Delete) service method
+
+                    int rowsaffected = _productServices.Product_LogicalDelete(currentProduct);
+
+                    if (rowsaffected == 0)
+                    {
+                        //feedback to user on no changes but no abort
+                        feedBackMsg=$"{currentProduct.ProductName} (ID:{currentProduct.ProductID}) discontinued failed.";
+                    }
+                    else
+                    {
+                        //feedback to user on success
+                        feedBackMsg=$"{currentProduct.ProductName} (ID:{currentProduct.ProductID}) has been discontinued.";
+                    }
+
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            feedBackMsg=$"System Error: {ex.Message}";
+        }
+    }
+
+    // if you are going to physically remove a record that is of importance
+    //  CONSIDER prompting the user for confirmation BEFORE phyiscally removing
+    //  the record
+    // private void OnRemoval()
+    // {
+        //clear out old messages
+        // feedBackMsg = "";
+        // errorMsgs.Clear();
+        // validationMessageStore.Clear();
+
+        // try
+        // {
+            //call the removal (aka physical Delete) service method
+            // int rowsaffected = _productServices.Product_PhysicalDelete(currentProduct);
+            // if (rowsaffected == 0)
+            // {
+                //feedback to user on no changes but no abort
+            //     feedBackMsg=$"{currentProduct.ProductName} (ID:{currentProduct.ProductID}) removal failed.";
+            // }
+            // else
+            // {
+                //feedback to user on success
+    //             feedBackMsg=$"{currentProduct.ProductName} (ID:{currentProduct.ProductID}) has been remove from service.";
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         feedBackMsg=$"System Error: {ex.Message}";
+    //     }
+    // }
+
 
     //this event will prompt the user to continue by using a javascript dialogue
     //the program needs to WAIT until the user responses
@@ -454,6 +574,22 @@ this is optional
             //          instance
             editContext = new EditContext(currentProduct);
         }
-        
+
+    }
+
+    private async Task OnGoToSearch()
+    {
+        //clear out old messages
+        feedBackMsg = "";
+        errorMsgs.Clear();
+
+        //stepup and execute the prompt dialogue
+        object[] messagestring = new object[]
+            {"Leaving the page will lose all non-saved data. Do you wish to continue?"};
+        if (await (jSRuntime.InvokeAsync<bool>("confirm", messagestring)))
+        {
+            navigationManager.NavigateTo("categoryproducts");
+        }
+
     }
 }

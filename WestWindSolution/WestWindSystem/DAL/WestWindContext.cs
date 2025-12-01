@@ -7,6 +7,10 @@ using WestWindSystem.Entities;
 
 namespace WestWindSystem.DAL;
 
+/*
+ * the internal access level restricts calls to this class to ONLY other
+ *  classes/methods within the library
+ */
 internal partial class WestWindContext : DbContext
 {
     public WestWindContext(DbContextOptions<WestWindContext> options)

@@ -42,8 +42,23 @@
         &nbsp;&nbsp;
         <button type="submit" class="btn btn-outline-primary rounded-pill"
         @onclick="FetchProducts">Fetch Products</button>
-       
 
+        <!--
+            these two button will demonstrate ways that you can call
+            another page from an existing page
+            one button will have a NavLink to the new page
+            one button will call an event method on this page which
+                will navigate to the new page
+        -->
+        <br/><br/>
+        <button type="submit" class="btn btn-outline-info rounded-pill">
+            <NavLink href="productcrud">CRUD vai NavLink</NavLink>
+        </button>
+        &nbsp;&nbsp;
+        <button type="submit" class="btn btn-outline-info rounded-pill"
+                @onclick="GoToCRUD">
+            CRUD via Event
+        </button>
     </div>
 </div>
 <br/><br/>
@@ -140,7 +155,7 @@ drop down list of category names to select from
         categoryList = _categoryServices.Category_GetAll();
         //retrieve the list of supplier via the SupplierServices in your BLL
         supplierList = _supplierServices.Supplier_GetAll();
-        
+
     }
 
 
@@ -170,5 +185,9 @@ drop down list of category names to select from
         }
     }
 
-   
+    private void GoToCRUD()
+    {
+        _navManager.NavigateTo("productcrud");
+    }
+
 }
